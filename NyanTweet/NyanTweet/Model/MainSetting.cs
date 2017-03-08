@@ -12,12 +12,11 @@ namespace NyanTweet.Model
 	{
 		private const string DEF_TWEET = "にゃーん";
 
-		//public string TweetWord { get; set; }
-		public ReactiveProperty<string> TweetWord { get; }
+        public string TweetWord { get; set; } = DEF_TWEET;
 
-		public MainSetting()
+        public MainSetting()
 		{
-			this.TweetWord = new ReactiveProperty<string>(ImmediateScheduler.Instance, DEF_TWEET);
+			
 		}
 	}
 }
