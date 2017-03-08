@@ -11,23 +11,7 @@ namespace NyanTweet
     {
         public App()
         {
-			// The root page of your application
-			MainPage = new ContentPage
-            {
-                Content = new StackLayout
-                {
-                    VerticalOptions = LayoutOptions.Center,
-                    Children = {
-                         new Label {
-                             HorizontalTextAlignment = TextAlignment.Center,
-                             Text = "Welcome to Xamarin Forms!"
-                         }
-                     }
-                }
-            };
-
-			//this.MainPage = new MainPage();
-			//this.MainPage = new Page1();
+			this.MainPage = new View.MainPage();
 		}
 
         protected override void OnStart()
