@@ -19,7 +19,7 @@
         <Label Text="{Binding Message.Value}"/>
         <StackLayout Orientation="Horizontal" HorizontalOptions="End">
       <Button Text="アカウント設定"/>
-      <Button Text="設定"/>
+	  <Button Text="{Binding SettingButtonText.Value}" Command="{Binding SettingCommand}"/>
     </StackLayout>
   </StackLayout>
 
