@@ -1,4 +1,4 @@
-ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:NyanTweet"
@@ -10,14 +10,14 @@
   </ContentPage.BindingContext>
   
   <StackLayout HorizontalOptions="FillAndExpand" Margin="20">
-    <Button Text="{Binding TweetWord}"
+    <Button Text="{Binding TweetWord.Value}"
             HorizontalOptions="FillAndExpand"
             VerticalOptions="FillAndExpand"
             FontSize="Large"
             />
     <StackLayout Orientation="Horizontal" HorizontalOptions="End">
-      <Button Text="ã‚¢ã‚«ã‚¦ãƒ³ãƒˆè¨­å®š"/>
-      <Button Text="è¨­å®š"/>
+      <Button Text="ƒAƒJƒEƒ“ƒgÝ’è"/>
+      <Button Text="Ý’è"/>
     </StackLayout>
   </StackLayout>
 
