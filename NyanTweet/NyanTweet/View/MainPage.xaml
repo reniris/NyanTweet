@@ -14,8 +14,10 @@
             HorizontalOptions="FillAndExpand"
             VerticalOptions="FillAndExpand"
             FontSize="Large"
+            Command="{Binding TweetCommand}"
             />
-    <StackLayout Orientation="Horizontal" HorizontalOptions="End">
+        <Label Text="{Binding Message.Value}"/>
+        <StackLayout Orientation="Horizontal" HorizontalOptions="End">
       <Button Text="アカウント設定"/>
       <Button Text="設定"/>
     </StackLayout>
