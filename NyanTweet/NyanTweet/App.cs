@@ -11,8 +11,8 @@ namespace NyanTweet
     {
         public App()
         {
-            // The root page of your application
-            MainPage = new ContentPage
+			// The root page of your application
+			MainPage = new ContentPage
             {
                 Content = new StackLayout
                 {
@@ -25,7 +25,10 @@ namespace NyanTweet
                      }
                 }
             };
-        }
+
+			//this.MainPage = new MainPage();
+			//this.MainPage = new Page1();
+		}
 
         protected override void OnStart()
         {
