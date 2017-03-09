@@ -5,22 +5,22 @@
              x:Class="NyanTweet.View.MainPage"
              xmlns:vm="clr-namespace:NyanTweet.ViewModel">
 
-  <ContentPage.BindingContext>
-    <vm:MainPageViewModel />
-  </ContentPage.BindingContext>
-  
-  <StackLayout HorizontalOptions="FillAndExpand" Margin="20">
-    <Button Text="{Binding TweetWord.Value}"
+    <ContentPage.BindingContext>
+        <vm:MainPageViewModel />
+    </ContentPage.BindingContext>
+
+    <StackLayout HorizontalOptions="FillAndExpand" Margin="20">
+        <Button Text="{Binding TweetWord.Value}"
             HorizontalOptions="FillAndExpand"
             VerticalOptions="FillAndExpand"
             FontSize="Large"
             Command="{Binding TweetCommand}"
             />
+        <Editor Text="{Binding SettingText.Value}" IsVisible="{Binding IsVisibleSetting.Value}" VerticalOptions="FillAndExpand"/>
         <Label Text="{Binding Message.Value}"/>
         <StackLayout Orientation="Horizontal" HorizontalOptions="End">
-      <Button Text="アカウント設定"/>
-	  <Button Text="{Binding SettingButtonText.Value}" Command="{Binding SettingCommand}"/>
+            <Button Text="{Binding SettingButtonText.Value}" Command="{Binding SettingCommand}"/>
+        </StackLayout>
     </StackLayout>
-  </StackLayout>
 
 </ContentPage>
