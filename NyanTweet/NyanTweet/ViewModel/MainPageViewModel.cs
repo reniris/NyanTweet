@@ -55,7 +55,7 @@ namespace NyanTweet.ViewModel
         /// <summary>
         /// 設定用クラス
         /// </summary>
-        private MainSetting _setting = new MainSetting();
+        private MainSetting _setting = MainSetting.LoadJson();
 
         /// <summary>
         /// 設定ボタン表示文のリスト
