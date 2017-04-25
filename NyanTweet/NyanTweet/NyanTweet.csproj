@@ -34,6 +34,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="APIKey.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>APIKey.resx</DependentUpon>
+    </Compile>
     <Compile Include="App.cs" />
     <Compile Include="Model\MainSetting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -46,7 +51,10 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="View\" />
+    <EmbeddedResource Include="APIKey.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>APIKey.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="View\MainPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
