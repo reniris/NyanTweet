@@ -16,7 +16,8 @@
             FontSize="Large"
             Command="{Binding TweetCommand}"
             />
-        <Editor Text="{Binding SettingText.Value}" IsVisible="{Binding IsVisibleSetting.Value}" VerticalOptions="FillAndExpand"/>
+        <Editor Text="{Binding SettingText.Value}" IsVisible="{Binding IsVisibleSetting.Value}" VerticalOptions="FillAndExpand" 
+		TextColor="Black" BackgroundColor="White"/>
         <Label Text="{Binding Message.Value}"/>
         <StackLayout Orientation="Horizontal" HorizontalOptions="End">
             <Button Text="{Binding SettingButtonText.Value}" Command="{Binding SettingCommand}"/>

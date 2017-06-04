@@ -58,6 +58,11 @@ namespace NyanTweet.ViewModel
         private MainSetting _setting = MainSetting.LoadJson();
 
         /// <summary>
+        /// ツイート用クラス
+        /// </summary>
+        private Tweet _tweet = new Tweet();
+
+        /// <summary>
         /// 設定ボタン表示文のリスト
         /// </summary>
         private static readonly string[] SettingButtonTextList = new string[] { "設定", "確定" };
@@ -89,10 +94,14 @@ namespace NyanTweet.ViewModel
             this.SettingCommand = this.SettingText.Select(s => IsTweet(s)).ToReactiveCommand().AddTo(this.Disposable);
 
             //ツイートコマンドの実装
-            this.TweetCommand.Subscribe(_ => this.Message.Value = this.TweetWord.Value);
-            
-            //ツイート文設定コマンドの実装
-            this.SettingCommand.Subscribe(_ =>
+            this.TweetCommand.Subscribe(async _ =>
+            {
+				await _tweet.TweetTextAsync(TweetWord.Value);    //ツイート
+                this.Message.Value = this.TweetWord.Value;      //メッセージ欄にツイート文を表示                
+            });
+			
+			//ツイート文設定コマンドの実装
+			this.SettingCommand.Subscribe(_ =>
             {
                 //ツイート文を変更
                 this.TweetWord.Value = this.SettingText.Value;
@@ -105,7 +114,7 @@ namespace NyanTweet.ViewModel
         }
 
         /// <summary>
-        /// ツイートできるかどうか
+        /// ツイートできるかどうか（今は文字列長しか見てない）
         /// </summary>
         /// <param name="tweet"></param>
         /// <returns></returns>
@@ -115,11 +124,11 @@ namespace NyanTweet.ViewModel
         }
 
         /// <summary>
-        /// 
+        /// Dispose
         /// </summary>
         public void Dispose()
         {
-            this.Disposable.Dispose();
+			this.Disposable.Dispose();
         }
     }
 }
