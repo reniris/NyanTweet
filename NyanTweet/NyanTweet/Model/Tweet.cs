@@ -43,7 +43,15 @@ namespace NyanTweet.Model
 		/// <summary>
 		/// ツイート用トークン
 		/// </summary>
-		private Tokens token = null;
+		public Tokens Token { get; private set; } = null;
+
+		/// <summary>
+		/// Gets the last error message.
+		/// </summary>
+		/// <value>
+		/// The last error message.
+		/// </value>
+		public string LastErrMessage { get; private set; } = null;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Tweet"/> class.
@@ -57,49 +65,103 @@ namespace NyanTweet.Model
 		}
 
 		/// <summary>
+		/// トークンの初期化
+		/// </summary>
+		/// <param name="token">アクセストークン文字列</param>
+		/// <param name="secret">アクセストークンsecret</param>
+		/// <returns></returns>
+		public async Task<bool> InitTokenAsync(string token, string secret)
+		{
+			//トークンがすでに存在する場合には何もしない
+			if (this.Token != null)
+				return true;
+
+			bool t1, t2;
+
+			//トークンが復元できる場合はそれをつかう
+			if (this.Token == null)
+				t1 = await CreateTokenAsync(token, secret);
+
+			//トークンがない場合は認証する
+			if (this.Token == null)
+				t2 = await OAuthAsync();
+
+			return (this.Token != null);
+		}
+
+		/// <summary>
+		/// アクセストークンを作成
+		/// </summary>
+		/// <param name="token">accesstoken</param>
+		/// <param name="secret">accesssecret</param>
+		/// <returns>トークンを作成できればtrueそうでなければfalse</returns>
+		private async Task<bool> CreateTokenAsync(string token, string secret)
+		{
+			Tokens t = null;
+			if (string.IsNullOrEmpty(token) == true || string.IsNullOrEmpty(secret) == true)
+			{
+				t = null;
+			}
+			else
+			{
+				try
+				{
+					//トークンを作成
+					t = Tokens.Create(this.APIkey, this.APIsecret, token, secret);
+					// トークン有効性確認
+					var res = await t.Account.VerifyCredentialsAsync();
+
+					this.Token = t;
+				}
+				catch (Exception ex)
+				{
+					t = null;
+					this.LastErrMessage = ex.Message;
+				}
+			}
+
+			this.Token = t;
+			return (t != null);
+		}
+
+		/// <summary>
 		/// ツイートする
 		/// </summary>
 		/// <param name="text">ツイート文</param>
 		/// <returns></returns>
 		public async Task<StatusResponse> TweetTextAsync(string text)
 		{
-			if (token == null)
-			{
-				await OAuthAsync();
-			}
+			if (this.Token == null)
+				return null;
 
-			if (token != null)
+			StatusResponse res = null;
+			try
 			{
-				StatusResponse res = null;
-				try
-				{
-					res = await token.Statuses.UpdateAsync(new { status = text });
-				}
-				catch (Exception ex)
-				{
-					Debug.WriteLine(ex.Message);
-				}
-				return res;
-
+				res = await this.Token.Statuses.UpdateAsync(new { status = text });
 			}
-			return null;
+			catch (Exception ex)
+			{
+				Debug.WriteLine(ex.Message);
+				this.LastErrMessage = ex.Message;
+			}
+			return res;
 		}
 
 		/// <summary>
 		/// OAuth認証
 		/// </summary>
-		/// <returns>認証されたトークン、トークンが取得できなかったりおかしい場合はnull</returns>
-		private async Task<Tokens> OAuthAsync()
+		/// <returns>認証が成功して有効なトークンが取得できればtrue、そうでない場合はfalse</returns>
+		private async Task<bool> OAuthAsync()
 		{
 			//コールバック用カスタムURLスキーマ
 			string callback = CustomScheme + "://" + CustomSchemeHost;
 			//認証
-			var session = await OAuth.AuthorizeAsync(this.APIkey, this.APIsecret,callback);
+			var session = await OAuth.AuthorizeAsync(this.APIkey, this.APIsecret, callback);
 
 			//ブラウザで認証ページを開いてコールバックでパラメータを取得
 			var launchedUri = await DependencyService.Get<IAppHandler>().LaunchUri(session.AuthorizeUri.AbsoluteUri);
 			if (string.IsNullOrEmpty(launchedUri) == true)
-				return null;
+				return false;
 
 			//クエリパラメータ文字列を取得
 			string query = new Uri(launchedUri).GetComponents(UriComponents.Query, UriFormat.UriEscaped);
@@ -113,11 +175,11 @@ namespace NyanTweet.Model
 
 			//oauth_token と oauth_verifierを取得
 			string oauth_token, oauth_verifier;
-			var o1 = parameters.TryGetValue("oauth_token",out oauth_token);
-			var o2 = parameters.TryGetValue("oauth_verifier",out oauth_verifier);
+			var o1 = parameters.TryGetValue("oauth_token", out oauth_token);
+			var o2 = parameters.TryGetValue("oauth_verifier", out oauth_verifier);
 			//パラメータが存在しなければnullを返す
 			if (o1 == false || o2 == false)
-				return null;
+				return false;
 
 			Tokens t = null;
 			try
@@ -127,14 +189,15 @@ namespace NyanTweet.Model
 				// トークン有効性確認
 				var res = await t.Account.VerifyCredentialsAsync();
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
 				//トークンが有効でないときはnullに
 				t = null;
+				this.LastErrMessage = ex.Message;
 			}
 
-			this.token = t;
-			return t;
+			this.Token = t;
+			return (t != null);
 		}
 	}
 }

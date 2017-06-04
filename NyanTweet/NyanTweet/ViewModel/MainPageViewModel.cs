@@ -55,7 +55,7 @@ namespace NyanTweet.ViewModel
         /// <summary>
         /// 設定用クラス
         /// </summary>
-        private MainSetting _setting = MainSetting.LoadJson();
+        private MainSetting _setting = MainSetting.Load();
 
         /// <summary>
         /// ツイート用クラス
@@ -89,16 +89,25 @@ namespace NyanTweet.ViewModel
             this.IsVisibleSetting = new ReactiveProperty<bool>(false);
             this.SettingButtonText = new ReactiveProperty<string>(SettingButtonTextList[SettingButtonTextIndex]);
 
-            //コマンドの初期化
-            this.TweetCommand = this.TweetWord.Select(s => IsTweet(s)).ToReactiveCommand().AddTo(this.Disposable);
-            this.SettingCommand = this.SettingText.Select(s => IsTweet(s)).ToReactiveCommand().AddTo(this.Disposable);
+			//コマンドの初期化
+			this.TweetCommand = this.TweetWord.Select(s => IsTweet(s)).ToReactiveCommand().AddTo(this.Disposable);			
+			this.SettingCommand = new ReactiveCommand().AddTo(this.Disposable);
 
             //ツイートコマンドの実装
             this.TweetCommand.Subscribe(async _ =>
             {
-				await _tweet.TweetTextAsync(TweetWord.Value);    //ツイート
-                this.Message.Value = this.TweetWord.Value;      //メッセージ欄にツイート文を表示                
-            });
+				//トークン初期化（すでにトークンが存在する場合は何もしない）
+				var init = await _tweet.InitTokenAsync(this._setting.AccessToken, this._setting.AccessTokenSecret);
+				//ツイート
+				var res = await _tweet.TweetTextAsync(TweetWord.Value);
+				//アクセストークンをセーブ（変更がない場合はファイルに書き込まれません）
+				this._setting.SetAccessToken(_tweet.Token.AccessToken, _tweet.Token.AccessTokenSecret);
+
+				if (res != null)    
+					this.Message.Value = this.TweetWord.Value;          //メッセージ欄にツイート文を表示
+				else
+					this.Message.Value = this._tweet.LastErrMessage;	//エラーのときはエラーメッセージを表示
+			});
 			
 			//ツイート文設定コマンドの実装
 			this.SettingCommand.Subscribe(_ =>
@@ -111,15 +120,18 @@ namespace NyanTweet.ViewModel
                 //ボタンテキスト設定、確定の切り替え
                 this.SettingButtonText.Value = SettingButtonTextList[SettingButtonTextIndex ^= 1];
             });
-        }
+		}
 
-        /// <summary>
-        /// ツイートできるかどうか（今は文字列長しか見てない）
-        /// </summary>
-        /// <param name="tweet"></param>
-        /// <returns></returns>
-        private static bool IsTweet(string tweet)
+		/// <summary>
+		/// ツイートできるかどうか（今は文字列長しか見てない）
+		/// </summary>
+		/// <param name="tweet"></param>
+		/// <returns></returns>
+		private static bool IsTweet(string tweet)
         {
+			if (string.IsNullOrEmpty(tweet) == true)
+				return false;
+
             return 0 < tweet.Length && tweet.Length <= 140;
         }
 

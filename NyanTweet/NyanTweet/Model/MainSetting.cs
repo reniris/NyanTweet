@@ -41,34 +41,99 @@ namespace NyanTweet.Model
             }
             set
             {
-                _TweetWord = value;
-
-                SaveJson(this);
+				if (_TweetWord != value)
+				{
+					_TweetWord = value;
+					Save(this);
+				}
             }
         }
+		
+		/// <summary>
+		/// The access token
+		/// </summary>
+		private string _AccessToken = null;
 
-        /// <summary>
-        /// Prevents a default instance of the <see cref="MainSetting"/> class from being created.
-        /// </summary>
-        private MainSetting()
+		/// <summary>
+		/// Gets or sets the access token.
+		/// </summary>
+		/// <value>
+		/// The access token.
+		/// </value>
+		[JsonProperty]
+		public string AccessToken
+		{
+			get { return _AccessToken; }
+			private set { _AccessToken = value; }
+		}
+
+		/// <summary>
+		/// The access token secret
+		/// </summary>
+		private string _AccessTokenSecret = null;
+
+		/// <summary>
+		/// Gets or sets the access token secret.
+		/// </summary>
+		/// <value>
+		/// The access token secret.
+		/// </value>
+		[JsonProperty]
+		public string AccessTokenSecret
+		{
+			get { return _AccessTokenSecret; }
+			private set { _AccessTokenSecret = value; }
+		}
+
+		/// <summary>
+		/// Prevents a default instance of the <see cref="MainSetting"/> class from being created.
+		/// </summary>
+		private MainSetting()
         {
 
         }
 
-        /// <summary>
-        /// ファイル名
-        /// </summary>
-        private const string TextFileName = "setting.json";
+		/// <summary>
+		/// アクセストークンをセット
+		/// </summary>
+		/// <param name="token">accesstoken</param>
+		/// <param name="secret">accesssecret</param>
+		public void SetAccessToken(string token, string secret)
+		{
+			//変更がない場合は何もしない
+			if (this.AccessToken == token && this.AccessTokenSecret == secret)
+				return;
+
+			this.AccessToken = token;
+			this.AccessTokenSecret = secret;
+
+			//ファイルに書き込む
+			Save(this);
+		}
+
+		/// <summary>
+		/// ファイル名
+		/// </summary>
+		private const string TextFileName = "setting.json";
+
+		/// <summary>
+		/// データをセーブ
+		/// </summary>
+		static public void Save(MainSetting data)
+		{
+			var json = SaveJson(data);
+			var task = SaveTextAsync(json);
+			task.Wait();
+		}
 
         /// <summary>
         /// JSONに書き出す
         /// </summary>
         /// <param name="data">書き出すデータ</param>
-        static private void SaveJson(MainSetting data)
+        static private string SaveJson(MainSetting data)
         {
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
-            var task = SaveTextAsync(json);
-            task.Wait();
+			return json;
         }
         
         /// <summary>
@@ -92,20 +157,31 @@ namespace NyanTweet.Model
             return file.Path;
         }
 
+		/// <summary>
+		/// データをロード
+		/// </summary>
+		/// <returns>ロードしたデータ　ロードできなかった場合は初期値でインスタンスを作成</returns>
+		static public MainSetting Load()
+		{
+			var jsonstring = LoadTextAsync();
+			MainSetting data = LoadJson(jsonstring.Result);
+			if(data == null)
+				data = new MainSetting();
+
+			return data;
+		}
+
         /// <summary>
         /// JSONからロード
         /// </summary>
         /// <returns></returns>
-        static public MainSetting LoadJson()
+        static private MainSetting LoadJson(string jsonstring)
         {
-            var jsonstring = LoadTextAsync().Result;
-            MainSetting data;
+            MainSetting data = null;
             if (String.IsNullOrEmpty(jsonstring) == false)
                 data = JsonConvert.DeserializeObject<MainSetting>(jsonstring);
-            else
-                data = new MainSetting();
 
-            return data;
+			return data;
         }
         
         /// <summary>
